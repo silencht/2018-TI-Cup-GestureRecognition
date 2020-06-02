@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\HARDWARE\LED;..\FWLIB\inc;..\HARDWARE\FDC2214;..\HARDWARE\USART;..\HARDWARE\DataScope_DP;..\HARDWARE\FDC22142;..\HARDWARE\matrix;..\HARDWARE\LCD;..\HARDWARE\EXTI</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\HARDWARE\LED;..\FWLIB\inc;..\HARDWARE\FDC2214;..\HARDWARE\USART;..\HARDWARE\DataScope_DP;..\HARDWARE\FDC22142;..\HARDWARE\matrix;..\HARDWARE\LCD;..\HARDWARE\EXTI;..\HARDWARE\LED_BEEP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -429,6 +429,11 @@
               <FileName>silencht_usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\USART\silencht_usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>BEEP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\LED_BEEP\BEEP.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -202,12 +202,12 @@ void uart4_init(u32 bound){
 ****************************************************************************/
 void u1_printf (char *fmt, ...) 
 { 
-	char buffer[600+1];  // 发送缓冲数组长度自己定义 
+	char buffer[100+1];  // 发送缓冲数组长度自己定义 
 	u8 i = 0; 
 	va_list arg_ptr; 
 	va_start(arg_ptr, fmt);   
-	vsnprintf(buffer, 600+1, fmt, arg_ptr); 
-	while ((i < 600) && buffer[i]) 
+	vsnprintf(buffer, 100+1, fmt, arg_ptr); 
+	while ((i < 100) && buffer[i]) 
 		{ 
 		  USART1->SR; //防止首字符丢失
 			USART_SendData(USART1, (u8) buffer[i++]); 

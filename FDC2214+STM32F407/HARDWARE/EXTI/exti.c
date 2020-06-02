@@ -4,6 +4,9 @@
 #include "silencht_usart.h"
 #include "fdc2214.h"
 #include "fdc22142.h"
+#include "lcd.h"
+#include "math.h"
+#include "DataScope_DP.h"
 
 /*
 						1£ºÑµÁ·Õß1ÊÖ »¬¶¯Æ½¾ùÂË²¨»º³åÇøÓëº¯ÊıÉùÃ÷   ÑµÁ·Õß2ÊÖ ÂË²¨»º³åÇøÓëº¯ÊıÉùÃ÷
@@ -19,6 +22,7 @@
 float init_Cap_buffer[InitCap_N+1]; 
 float crrent_Cap_buffer[CrrentCap_N+1]; 
 
+
 		  
 u8 mode=0;      
 u8 start_end=0;
@@ -27,12 +31,17 @@ u8 roshambo_wait=0; //²ÂÈ­ÑµÁ·µÈ´ı±êÖ¾£¬¡¾0¡¿£ºÈ«²¿Î´Íê³É¡¾1¡¿£º¼ôµ¶¡¢²¼Î´Íê³É¡¾
 u8 number_wait=0;   //»®È­ÑµÁ·µÈ´ı±êÖ¾£¬¡¾0¡¿£ºÈ«²¿Î´Íê³É¡¾1¡¿£º234Î´Íê³É¡¾2¡¿£º34Î´Íê³É¡¾3¡¿£º4Î´Íê³É¡¾4¡¿:È«²¿Íê³É
 
 
-//ÑµÁ·Ê±²ÂÈ­ÊÖÊÆÍ¨µÀ¼ÇÂ¼¼Ä´æ£¬¸ß4Î»ÎªÑµÁ·Õß1µÄ0-3Í¨µÀ£¬µÍËÄÎ»ÎªÑµÁ·Õß2µÄ0-3Í¨µÀ ¶ÔÓ¦Î»ÖµÎª0ÎªÎŞÊÖÖ¸£¬ÖµÎª1ÎªÓÒÊÖÖ¸
+//ÑµÁ·Ê±²ÂÈ­ÊÖÊÆÍ¨µÀ¼ÇÂ¼¼Ä´æ£¬¸ß4Î»ÎªÑµÁ·Õß1µÄ0-3Í¨µÀ£¬µÍËÄÎ»ÎªÑµÁ·Õß2µÄ0-3Í¨µÀ ¶ÔÓ¦Î»ÖµÎª0ÎªÎŞÊÖÖ¸£¬ÖµÎª1ÎªÓÒÊÖÖ¸¡¾Èı´Î¼ì²â¡¿
 u8 rock_hand_record=0,paper_hand_record=0,scissors_hand_record=0;
+u8 rock_hand_record2=0,paper_hand_record2=0,scissors_hand_record2=0;
+u8 rock_hand_record3=0,paper_hand_record3=0,scissors_hand_record3=0;
+
 
 //ÑµÁ·Ê±»®È­ÊÕÊ°Í¨µÀ¼ÇÂ¼¼Ä´æ£¬number1-5¼ÇÂ¼ÑµÁ·Õß»®È­ÊÖÊÆ1-5,ÆäÖĞnumber¸ßËÄÎ»ÎªÑµÁ·Õß1µÄÍ¨µÀ¼ÇÂ¼£¬µÍËÄÎ»ÎªÑµÁ·Õß2µÄÍ¨µÀ¼ÇÂ¼
 //¼ÇÂ¼number4µÄ×ÜµçÈİÖµ£¬Ò»µ©´óÓÚÖ®£¬Ôònumber5¸ß[µÍ]ËÄÎ»È«ÖÃ1£¬´ËÊ±ÎªÎå¸öÊÖÖ¸
 u8 number1_record=0,number2_record=0,number3_record=0,number4_record=0,number5_record=0;
+u8 number1_record2=0,number2_record2=0,number3_record2=0,number4_record2=0,number5_record2=0;
+u8 number1_record3=0,number2_record3=0,number3_record3=0,number4_record3=0,number5_record3=0;
 float num4_SumCap1=0,num4_SumCap2=0; //¼ÇÂ¼ÑµÁ·Õß1ºÍ2µÄÊÖÊÆ4£¬¼´number4µÄµçÈİºÍ×÷ÎªãĞÖµ£¬ÔÚmainÖĞÅĞ¶ÏÊÇ·ñÕû¸öÊÖÕÆ¡¾¼´5¸öÊÖÖ¸·ÅÉÏ¡¿
 
 //´®¿ÚÓï¾ä´ÎÊıÏŞÖÆ
@@ -41,7 +50,7 @@ u8 usart_num=0;
 
 
 
-float temp[8]; 										  //µçÈİ³õÖµÊı×é
+float temp[8],test_temp[8]; 				//µçÈİ³õÖµÊı×é,³õÊ¼»¯²âÊÔµçÈİ³õÖµÊı×é
 
 float rock[8],paper[8],scissors[8]; //ÑµÁ·Õß²ÂÈ­Êı×é,¡¾0-3¡¿Îª¡¾ÑµÁ·Õß1¡¿,¡¾4-7¡¿Îª¡¾ÑµÁ·Õß2¡¿
 
@@ -50,7 +59,7 @@ float number[8];				            //ÑµÁ·Õß»®È­Êı×é,¡¾0-3¡¿Îª¡¾ÑµÁ·Õß1¡¿,¡¾4-7¡¿Îª¡
 
 /*Íâ²¿ÖĞ¶Ï0·şÎñ³ÌĞò PF0  	
 
-------------------------------------1»ñµÃ³õÊ¼µçÈİÖµÖĞ¶Ï°´Å¥------------------------------------------------														
+------------------------------------1³õÊ¼ÖĞ¶Ï°´Å¥------------------------------------------------														
 															
 */
 void EXTI0_IRQHandler(void)
@@ -59,7 +68,9 @@ void EXTI0_IRQHandler(void)
 	if(GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_0)==1) //ÉÏÉıÑØ
 	{
 		Get_CapInit_Value(); //É¨ÃèµÃµ½³õÊ¼µçÈİÖµ
-		u1_printf("%f,%f,%f,%f,%f,%f,%f,%f \r\n",temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],temp[6],temp[7]); 
+		roshambo_wait=0;
+		number_wait=0; 
+//	u1_printf("%f,%f,%f,%f,%f,%f,%f,%f \r\n",temp[0],temp[1],temp[2],temp[3],temp[4],temp[5],temp[6],temp[7]); 
 	}
 	 EXTI_ClearITPendingBit(EXTI_Line0); //Çå³ıLINE10ÉÏµÄÖĞ¶Ï±êÖ¾Î» 
 }	
@@ -81,14 +92,60 @@ void EXTI1_IRQHandler(void)
   delay_ms(20);
 	if(GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_1)==1) 
 		{
-			 if(start_end==0){ mode++;if(mode>6)mode=1; } //Ö»ÓĞÔÚÄ£Ê½¿ª¹Østart_end¹Ø±ÕµÄÊ±ºò£¬²ÅÄÜÇĞ»»Ä£Ê½
-			 else u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
-			 if(mode==1)u1_printf ("µ±Ç°Ä£Ê½£º%d ,Ö±½ÓÅĞ¾ö²ÂÈ­Ä£Ê½\r\n",mode);
-			 else if(mode==2)u1_printf ("µ±Ç°Ä£Ê½£º%d ,Ö±½ÓÅĞ¾ö»®È­Ä£Ê½\r\n",mode);
-			 else if(mode==3)u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÑµÁ·²ÂÈ­Ä£Ê½\r\n",mode);
-			 else if(mode==4)u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÅĞ¾ö²ÂÈ­Ä£Ê½\r\n",mode);
-			 else if(mode==5)u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÑµÁ·»®È­Ä£Ê½\r\n",mode);
-			 else if(mode==6)u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÅĞ¾ö»®È­Ä£Ê½	\r\n",mode);
+			 if(start_end==0){ mode++;if(mode>8)mode=1; } //Ö»ÓĞÔÚÄ£Ê½¿ª¹Østart_end¹Ø±ÕµÄÊ±ºò£¬²ÅÄÜÇĞ»»Ä£Ê½
+			 else 
+			 {
+					 LCD_ShowString(82,57,152,16,16,"Current mode is not");//19 ×î¶à19×Ö·û
+			     LCD_ShowString(8,74,297,16,16,"closed,switch cannot be done"); //28 ×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+				}
+			 if(mode==1)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);     //u1_printf ("µ±Ç°Ä£Ê½£º%d ,Ö±½ÓÅĞ¾ö²ÂÈ­Ä£Ê½\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Direct Judgment  ");
+					 LCD_ShowString(8,74,297,16,16," Guessing Mode!             "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==2)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,Ö±½ÓÅĞ¾ö»®È­Ä£Ê½\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Direct Judgment  ");
+					 LCD_ShowString(8,74,297,16,16," Punch Mode!                "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==3)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÑµÁ·²ÂÈ­Ä£Ê½\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Train Guessing  ");
+					 LCD_ShowString(8,74,297,16,16,"  Mode!                     "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==4)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÅĞ¾ö²ÂÈ­Ä£Ê½\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Judgment Guessing  ");
+					 LCD_ShowString(8,74,297,16,16,"  Mode!                     "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==5)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÑµÁ·»®È­Ä£Ê½\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Train Punch         ");
+					 LCD_ShowString(8,74,297,16,16,"  Mode!                     "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==6)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÅĞ¾ö»®È­Ä£Ê½	\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Judgment Punch      ");
+					 LCD_ShowString(8,74,297,16,16,"  Mode!                     "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==7)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÅĞ¾ö»®È­Ä£Ê½	\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"  Music Piano         ");
+					 LCD_ShowString(8,74,297,16,16,"  Mode!                     "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
+			 else if(mode==8)
+			 {
+					 LCD_ShowNum(25+120,31,mode,1,24);//u1_printf ("µ±Ç°Ä£Ê½£º%d ,ÅĞ¾ö»®È­Ä£Ê½	\r\n",mode);
+					 LCD_ShowString(82,57,152,16,16,"       Gesture         ");
+					 LCD_ShowString(8,74,297,16,16,"  Mode!                     "); //×î¶à37×Ö·û  u1_printf ("µ±Ç°Ä£Ê½Î´¹Ø±Õ£¬²»ÄÜ½øĞĞÄ£Ê½ÇĞ»»£¡");
+			 }
 		}
 	 EXTI_ClearITPendingBit(EXTI_Line1);//Çå³ıLINE1ÉÏµÄÖĞ¶Ï±êÖ¾Î» 
 }
@@ -105,10 +162,9 @@ void EXTI2_IRQHandler(void)
 	delay_ms(10);
 	if(GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_2)==1)
 		{
-		  usart_num=1;
 			start_end=!start_end;  //¿ª¹Ø×ª»»
-			if(start_end>0)u1_printf ("Ä£Ê½¿ª£¡\r\n");
-			else u1_printf ("Ä£Ê½¹Ø£¡\r\n");
+			if(start_end>0)LCD_ShowString(185,33,32,16,16,"open");
+			else {LCD_ShowString(185,33,32,16,16,"off!");MinGet_CapInit_Value();}//u1_printf ("Ä£Ê½¹Ø£¡\r\n");
 		}
 	 EXTI_ClearITPendingBit(EXTI_Line2);//Çå³ıLINE1ÉÏµÄÖĞ¶Ï±êÖ¾Î» 
 }
@@ -124,13 +180,14 @@ void EXTI3_IRQHandler(void)
 	delay_ms(10);
 	if(GPIO_ReadInputDataBit(GPIOF,GPIO_Pin_3)==1)
 		{
-			usart_num=1;
+
+/*-------------------------------------------------------ÑµÁ·²ÂÈ­Ä£Ê½----------------------------------------------------------*/
 			if(mode==3) //Èç¹ûµ±Ç°ÎªÑµÁ·²ÂÈ­Ä£Ê½
 			{
 				if(roshambo_wait==0)	    //µ±Ç°È«²¿Î´Íê³É£¬ÏÖÔÚ¼ì²âÈ­Í·
 					{
 					
-							Get_CapCurrent_Value(rock,CrrentCap_N);
+							Get_CapCurrent_Value(rock);
 							
 							if((rock[0]*100)>Threshold)	rock_hand_record|=0x80;
 							if((rock[1]*100)>Threshold)	rock_hand_record|=0x40;
@@ -140,14 +197,44 @@ void EXTI3_IRQHandler(void)
 							if((rock[5]*100)>Threshold)	rock_hand_record|=0x04;
 							if((rock[6]*100)>Threshold)	rock_hand_record|=0x02;
 							if((rock[7]*100)>Threshold)	rock_hand_record|=0x01;
-							
-							u1_printf("ROCK:%f,%f,%f,%f \r\n",rock[4],rock[5],rock[6],rock[7]); 
-							u1_printf("ROCK:%d \r\n",rock_hand_record); 
+				
 							
 					}
-				else if(roshambo_wait==1) //µ±Ç°¼ì²â¼ôµ¶ºÍ²¼Î´Íê³É£¬ÏÖÔÚ¼ì²â¼ôµ¶
-					{
-							Get_CapCurrent_Value(scissors,CrrentCap_N);
+				else if(roshambo_wait==1)		//µ±Ç°È«²¿Î´Íê³É£¬ÏÖÔÚµÚ¶ş´Î¼ì²âÈ­Í·
+				 {
+					    Get_CapCurrent_Value(rock);
+							
+							if((rock[0]*100)>Threshold)	rock_hand_record2|=0x80;
+							if((rock[1]*100)>Threshold)	rock_hand_record2|=0x40;
+							if((rock[2]*100)>Threshold)	rock_hand_record2|=0x20;
+							if((rock[3]*100)>Threshold)	rock_hand_record2|=0x10;
+							if((rock[4]*100)>Threshold)	rock_hand_record2|=0x08;
+							if((rock[5]*100)>Threshold)	rock_hand_record2|=0x04;
+							if((rock[6]*100)>Threshold)	rock_hand_record2|=0x02;
+							if((rock[7]*100)>Threshold)	rock_hand_record2|=0x01;
+							
+							if(rock_hand_record==rock_hand_record2)roshambo_wait=2;//Èç¹ûµÚÒ»´Î¼ì²âºÍµÚ¶ş´Î¼ì²âÏàÍ¬£¬ÄÇÃ´Ö±½ÓÌø¹ıµÚÈı´Î²âÊÔ£¬½øÈëÏÂÒ»½×¶Î
+				
+				 }
+				else if(roshambo_wait==2)  //Ç°Á½´Î¼ì²â²»Ò»ÖÂ£¬½øĞĞµÚÈı´Î²âÊÔ
+				 {
+				 			Get_CapCurrent_Value(rock);
+							
+							if((rock[0]*100)>Threshold)	rock_hand_record3|=0x80;
+							if((rock[1]*100)>Threshold)	rock_hand_record3|=0x40;
+							if((rock[2]*100)>Threshold)	rock_hand_record3|=0x20;
+							if((rock[3]*100)>Threshold)	rock_hand_record3|=0x10;
+							if((rock[4]*100)>Threshold)	rock_hand_record3|=0x08;
+							if((rock[5]*100)>Threshold)	rock_hand_record3|=0x04;
+							if((rock[6]*100)>Threshold)	rock_hand_record3|=0x02;
+							if((rock[7]*100)>Threshold)	rock_hand_record3|=0x01;
+							
+							if(rock_hand_record2==rock_hand_record3)rock_hand_record=rock_hand_record2;//Èç¹ûµÚ¶ş´ÎºÍµÚÈı´ÎÒ»Ñù£¬ÄÇÃ´½«ÊÖÊÆ¼ÇÂ¼ÎªµÚ¶ş´Î£¬Èç¹ûµÚÒ»´ÎºÍµÚÈı´ÎÒ»Ñù£¬ÄÇÃ´ÊÖÊÆ¼ÇÂ¼²»±ä						
+				 
+				 }
+				else if(roshambo_wait==3)  //½øĞĞ¼ôµ¶µÚÒ»´ÎÑµÁ·
+				 {
+				      Get_CapCurrent_Value(scissors);
 							
 							if((scissors[0]*100)>Threshold)	scissors_hand_record|=0x80;
 							if((scissors[1]*100)>Threshold)	scissors_hand_record|=0x40;	
@@ -157,13 +244,42 @@ void EXTI3_IRQHandler(void)
 							if((scissors[5]*100)>Threshold)	scissors_hand_record|=0x04;
 							if((scissors[6]*100)>Threshold)	scissors_hand_record|=0x02;
 							if((scissors[7]*100)>Threshold)	scissors_hand_record|=0x01;
+				 
+				 }
+				else if(roshambo_wait==4) //¼ôµ¶µÚ¶ş´ÎÑµÁ·
+				{
+						  Get_CapCurrent_Value(scissors);
 							
-							u1_printf("SCISSORS:%f,%f,%f,%f \r\n",scissors[4],scissors[5],scissors[6],scissors[7]); 
-							u1_printf("SCISSORS:%d \r\n",scissors_hand_record); 
-					}
-				else if(roshambo_wait==2)//µ±Ç°¼ì²â²¼Î´Íê³É£¬ÏÖÔÚ¼ì²â²¼
+							if((scissors[0]*100)>Threshold)	scissors_hand_record2|=0x80;
+							if((scissors[1]*100)>Threshold)	scissors_hand_record2|=0x40;	
+							if((scissors[2]*100)>Threshold)	scissors_hand_record2|=0x20;
+							if((scissors[3]*100)>Threshold)	scissors_hand_record2|=0x10;
+							if((scissors[4]*100)>Threshold)	scissors_hand_record2|=0x08;
+							if((scissors[5]*100)>Threshold)	scissors_hand_record2|=0x04;
+							if((scissors[6]*100)>Threshold)	scissors_hand_record2|=0x02;
+							if((scissors[7]*100)>Threshold)	scissors_hand_record2|=0x01;
+							
+							if(scissors_hand_record==scissors_hand_record2)roshambo_wait=5;//Èç¹ûµÚÒ»´Î¼ì²âºÍµÚ¶ş´Î¼ì²âÏàÍ¬£¬ÄÇÃ´Ö±½ÓÌø¹ıµÚÈı´Î²âÊÔ£¬½øÈëÏÂÒ»½×¶Î
+				
+				}
+				else if(roshambo_wait==5) //
 					{
-							Get_CapCurrent_Value(paper,CrrentCap_N);
+							Get_CapCurrent_Value(scissors);
+							
+							if((scissors[0]*100)>Threshold)	scissors_hand_record3|=0x80;
+							if((scissors[1]*100)>Threshold)	scissors_hand_record3|=0x40;	
+							if((scissors[2]*100)>Threshold)	scissors_hand_record3|=0x20;
+							if((scissors[3]*100)>Threshold)	scissors_hand_record3|=0x10;
+							if((scissors[4]*100)>Threshold)	scissors_hand_record3|=0x08;
+							if((scissors[5]*100)>Threshold)	scissors_hand_record3|=0x04;
+							if((scissors[6]*100)>Threshold)	scissors_hand_record3|=0x02;
+							if((scissors[7]*100)>Threshold)	scissors_hand_record3|=0x01;
+							
+							if(scissors_hand_record2==scissors_hand_record3)rock_hand_record=rock_hand_record2;//Í¬ÉÏ
+					}
+				else if(roshambo_wait==6)//²¼µÚÒ»´Î¼ì²â
+				 {
+				      Get_CapCurrent_Value(paper);
 							
 							if((paper[0]*100)>Threshold)	paper_hand_record|=0x80;
 							if((paper[1]*100)>Threshold)	paper_hand_record|=0x40;
@@ -173,20 +289,55 @@ void EXTI3_IRQHandler(void)
 							if((paper[5]*100)>Threshold)	paper_hand_record|=0x04;
 						  if((paper[6]*100)>Threshold)	paper_hand_record|=0x02;
 						  if((paper[7]*100)>Threshold)	paper_hand_record|=0x01;
+				 
+				 
+				 }
+				else if(roshambo_wait==7)//²¼µÚ¶ş´Î¼ì²â
+					{
+							Get_CapCurrent_Value(paper);
 							
-							u1_printf("PAPER:%f,%f,%f,%f \r\n",paper[4],paper[5],paper[6],paper[7]); 
-							u1_printf("PAPER:%d \r\n",paper_hand_record); 
-					}				
-			 
-			 if(roshambo_wait<3) roshambo_wait++;
-			 else  roshambo_wait=0;
+							if((paper[0]*100)>Threshold)	paper_hand_record2|=0x80;
+							if((paper[1]*100)>Threshold)	paper_hand_record2|=0x40;
+							if((paper[2]*100)>Threshold)	paper_hand_record2|=0x20;
+							if((paper[3]*100)>Threshold)	paper_hand_record2|=0x10;
+							if((paper[4]*100)>Threshold)	paper_hand_record2|=0x08;
+							if((paper[5]*100)>Threshold)	paper_hand_record2|=0x04;
+						  if((paper[6]*100)>Threshold)	paper_hand_record2|=0x02;
+						  if((paper[7]*100)>Threshold)	paper_hand_record2|=0x01;	
+							
+							if(paper_hand_record==paper_hand_record2)roshambo_wait=8;
+							
+					}
+				else if(roshambo_wait==8)//²¼Ç°Á½´Î¼ì²â²»Ò»ÖÂ£¬½øĞĞµÚÈı´Î¼ì²â
+				 {
+							Get_CapCurrent_Value(paper);
+							
+							if((paper[0]*100)>Threshold)	paper_hand_record3|=0x80;
+							if((paper[1]*100)>Threshold)	paper_hand_record3|=0x40;
+							if((paper[2]*100)>Threshold)	paper_hand_record3|=0x20;
+							if((paper[3]*100)>Threshold)	paper_hand_record3|=0x10;
+							if((paper[4]*100)>Threshold)	paper_hand_record3|=0x08;
+							if((paper[5]*100)>Threshold)	paper_hand_record3|=0x04;
+						  if((paper[6]*100)>Threshold)	paper_hand_record3|=0x02;
+						  if((paper[7]*100)>Threshold)	paper_hand_record3|=0x01;	
+							
+							if(paper_hand_record2==paper_hand_record3)paper_hand_record=paper_hand_record2;//Í¬ÉÏ			
+				 }
+				 else if(roshambo_wait==9)//²¼Ç°Á½´Î¼ì²â²»Ò»ÖÂ£¬½øĞĞµÚÈı´Î¼ì²â
+				 {
+						LCD_ShowString(82,57,152,16,16,"Train Successful!");//19 ×î¶à19×Ö·û
+			      LCD_ShowString(8,74,297,16,16,"off Current mode,open mode 4"); //28 ×î¶à37×Ö·û				 
+				 }
+			   
+				if(roshambo_wait<9) roshambo_wait++;
 			}
 			
+/*-------------------------------------------------------ÑµÁ·»®È­Ä£Ê½----------------------------------------------------------*/
 			if(mode==5)//Èç¹ûµ±Ç°ÎªÑµÁ·»®È­Ä£Ê½£º1234
 			{
-				if(number_wait==0)//µ±Ç°È«²¿Î´Íê³É£¬ÏÖÔÚ¼ì²â 1	
+				if(number_wait==0)//µÚÒ»´Î¼ì²â 1	
 					{
-							Get_CapCurrent_Value(number,CrrentCap_N); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
 							if((number[0]*100)>Threshold)	number1_record|=0x80;
 							if((number[1]*100)>Threshold)	number1_record|=0x40;
 							if((number[2]*100)>Threshold)	number1_record|=0x20;
@@ -194,14 +345,39 @@ void EXTI3_IRQHandler(void)
 							if((number[4]*100)>Threshold)	number1_record|=0x08;
 							if((number[5]*100)>Threshold)	number1_record|=0x04;
 						  if((number[6]*100)>Threshold)	number1_record|=0x02;
-						  if((number[7]*100)>Threshold)	number1_record|=0x01;	
-							
-				      u1_printf("1:%f,%f,%f,%f \r\n",number[4],number[5],number[6],number[7]); 
-							u1_printf("1:%d \r\n",number1_record); 							
+						  if((number[7]*100)>Threshold)	number1_record|=0x01;								
 					}
-				if(number_wait==1)//µ±Ç°1Íê³É£¬ÏÖÔÚ¼ì²â 2	
-					{
-							Get_CapCurrent_Value(number,CrrentCap_N); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+				else if(number_wait==1)//µÚ¶ş´Î¼ì²â1
+				{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number1_record2|=0x80;
+							if((number[1]*100)>Threshold)	number1_record2|=0x40;
+							if((number[2]*100)>Threshold)	number1_record2|=0x20;
+							if((number[3]*100)>Threshold)	number1_record2|=0x10;
+							if((number[4]*100)>Threshold)	number1_record2|=0x08;
+							if((number[5]*100)>Threshold)	number1_record2|=0x04;
+						  if((number[6]*100)>Threshold)	number1_record2|=0x02;
+						  if((number[7]*100)>Threshold)	number1_record2|=0x01;
+							
+							if(number1_record==number1_record2)number_wait=2;		
+				}
+				else if(number_wait==2)//µÚÈı´Î¼ì²â1
+				{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number1_record3|=0x80;
+							if((number[1]*100)>Threshold)	number1_record3|=0x40;
+							if((number[2]*100)>Threshold)	number1_record3|=0x20;
+							if((number[3]*100)>Threshold)	number1_record3|=0x10;
+							if((number[4]*100)>Threshold)	number1_record3|=0x08;
+							if((number[5]*100)>Threshold)	number1_record3|=0x04;
+						  if((number[6]*100)>Threshold)	number1_record3|=0x02;
+						  if((number[7]*100)>Threshold)	number1_record3|=0x01;
+							
+							if(number1_record2==number1_record3)number1_record=number1_record2;
+				}
+				else if(number_wait==3)//µÚÒ»´Î¼ì²â2
+				{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
 							if((number[0]*100)>Threshold)	number2_record|=0x80;
 							if((number[1]*100)>Threshold)	number2_record|=0x40;
 							if((number[2]*100)>Threshold)	number2_record|=0x20;
@@ -209,14 +385,41 @@ void EXTI3_IRQHandler(void)
 							if((number[4]*100)>Threshold)	number2_record|=0x08;
 							if((number[5]*100)>Threshold)	number2_record|=0x04;
 						  if((number[6]*100)>Threshold)	number2_record|=0x02;
-						  if((number[7]*100)>Threshold)	number2_record|=0x01;		
-							
-	            u1_printf("2:%f,%f,%f,%f \r\n",number[4],number[5],number[6],number[7]); 
-							u1_printf("2:%d \r\n",number2_record);         			
-					}
-				if(number_wait==2)//µ±Ç°12Íê³É£¬ÏÖÔÚ¼ì²â 3	
+						  if((number[7]*100)>Threshold)	number2_record|=0x01;	
+				}
+					
+				else if(number_wait==4)//µÚ¶ş´Î¼ì²â2
 					{
-							Get_CapCurrent_Value(number,CrrentCap_N); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number2_record2|=0x80;
+							if((number[1]*100)>Threshold)	number2_record2|=0x40;
+							if((number[2]*100)>Threshold)	number2_record2|=0x20;
+							if((number[3]*100)>Threshold)	number2_record2|=0x10;
+							if((number[4]*100)>Threshold)	number2_record2|=0x08;
+							if((number[5]*100)>Threshold)	number2_record2|=0x04;
+						  if((number[6]*100)>Threshold)	number2_record2|=0x02;
+						  if((number[7]*100)>Threshold)	number2_record2|=0x01;
+							
+							if(number2_record==number2_record2)number_wait=5;											        			
+					}
+				else if(number_wait==5)//µÚÈı´Î¼ì²â2
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number2_record3|=0x80;
+							if((number[1]*100)>Threshold)	number2_record3|=0x40;
+							if((number[2]*100)>Threshold)	number2_record3|=0x20;
+							if((number[3]*100)>Threshold)	number2_record3|=0x10;
+							if((number[4]*100)>Threshold)	number2_record3|=0x08;
+							if((number[5]*100)>Threshold)	number2_record3|=0x04;
+						  if((number[6]*100)>Threshold)	number2_record3|=0x02;
+						  if((number[7]*100)>Threshold)	number2_record3|=0x01;
+							
+							if(number2_record2==number2_record3)number2_record=number2_record2;
+							 
+					}	
+				else if(number_wait==6)//µÚÒ»´Î¼ì²â3
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
 							if((number[0]*100)>Threshold)	number3_record|=0x80;
 							if((number[1]*100)>Threshold)	number3_record|=0x40;
 							if((number[2]*100)>Threshold)	number3_record|=0x20;
@@ -224,29 +427,125 @@ void EXTI3_IRQHandler(void)
 							if((number[4]*100)>Threshold)	number3_record|=0x08;
 							if((number[5]*100)>Threshold)	number3_record|=0x04;
 						  if((number[6]*100)>Threshold)	number3_record|=0x02;
-						  if((number[7]*100)>Threshold)	number3_record|=0x01;
-							
-							u1_printf("3:%f,%f,%f,%f \r\n",number[4],number[5],number[6],number[7]); 
-							u1_printf("3:%d \r\n",number3_record); 
-					}					
-				if(number_wait==3)//µ±Ç°123Íê³É£¬ÏÖÔÚ¼ì²â 4
-					{
-							Get_CapCurrent_Value(number,CrrentCap_N); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
-							if((number[0]*100)>Threshold)	number4_record|=0x80;num4_SumCap1+=number[0]*100;
-							if((number[1]*100)>Threshold)	number4_record|=0x40;num4_SumCap1+=number[1]*100;
-							if((number[2]*100)>Threshold)	number4_record|=0x20;num4_SumCap1+=number[2]*100;
-							if((number[3]*100)>Threshold)	number4_record|=0x10;num4_SumCap1+=number[3]*100;
-							if((number[4]*100)>Threshold)	number4_record|=0x08;num4_SumCap2+=number[4]*100;
-							if((number[5]*100)>Threshold)	number4_record|=0x04;num4_SumCap2+=number[5]*100;
-						  if((number[6]*100)>Threshold)	number4_record|=0x02;num4_SumCap2+=number[6]*100;
-						  if((number[7]*100)>Threshold)	number4_record|=0x01;num4_SumCap2+=number[7]*100;
-							
-						  u1_printf("4:%f,%f,%f,%f \r\n",number[4],number[5],number[6],number[7]); 
-							u1_printf("4:%d \r\n",number4_record); 									
+						  if((number[7]*100)>Threshold)	number3_record|=0x01;					 
 					}
-					
-					if(number_wait<4) number_wait++;
-					else number_wait=0;
+				else if(number_wait==7)//µÚ¶ş´Î¼ì²â3
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number3_record2|=0x80;
+							if((number[1]*100)>Threshold)	number3_record2|=0x40;
+							if((number[2]*100)>Threshold)	number3_record2|=0x20;
+							if((number[3]*100)>Threshold)	number3_record2|=0x10;
+							if((number[4]*100)>Threshold)	number3_record2|=0x08;
+							if((number[5]*100)>Threshold)	number3_record2|=0x04;
+						  if((number[6]*100)>Threshold)	number3_record2|=0x02;
+						  if((number[7]*100)>Threshold)	number3_record2|=0x01;
+							if(number3_record==number3_record2)number_wait=8;					 
+					}
+				else if(number_wait==8)//µÚÈı´Î¼ì²â3
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number3_record3|=0x80;
+							if((number[1]*100)>Threshold)	number3_record3|=0x40;
+							if((number[2]*100)>Threshold)	number3_record3|=0x20;
+							if((number[3]*100)>Threshold)	number3_record3|=0x10;
+							if((number[4]*100)>Threshold)	number3_record3|=0x08;
+							if((number[5]*100)>Threshold)	number3_record3|=0x04;
+						  if((number[6]*100)>Threshold)	number3_record3|=0x02;
+						  if((number[7]*100)>Threshold)	number3_record3|=0x01;
+							
+							if(number3_record2==number3_record3)number3_record=number3_record2;	 
+					}
+				else if(number_wait==9)//µÚÒ»´Î¼ì²â4
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number4_record|=0x80;
+							if((number[1]*100)>Threshold)	number4_record|=0x40;
+							if((number[2]*100)>Threshold)	number4_record|=0x20;
+							if((number[3]*100)>Threshold)	number4_record|=0x10;
+							if((number[4]*100)>Threshold)	number4_record|=0x08;
+							if((number[5]*100)>Threshold)	number4_record|=0x04;
+						  if((number[6]*100)>Threshold)	number4_record|=0x02;
+						  if((number[7]*100)>Threshold)	number4_record|=0x01;
+							 
+					}
+				else if(number_wait==10)//µÚ¶ş´Î¼ì²â4
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number4_record2|=0x80;
+							if((number[1]*100)>Threshold)	number4_record2|=0x40;
+							if((number[2]*100)>Threshold)	number4_record2|=0x20;
+							if((number[3]*100)>Threshold)	number4_record2|=0x10;
+							if((number[4]*100)>Threshold)	number4_record2|=0x08;
+							if((number[5]*100)>Threshold)	number4_record2|=0x04;
+						  if((number[6]*100)>Threshold)	number4_record2|=0x02;
+						  if((number[7]*100)>Threshold)	number4_record2|=0x01;
+							
+							if(number4_record==number4_record2)number_wait=11;			 
+					}
+				else if(number_wait==11)//µÚÈı´Î¼ì²â4
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number4_record3|=0x80;
+							if((number[1]*100)>Threshold)	number4_record3|=0x40;
+							if((number[2]*100)>Threshold)	number4_record3|=0x20;
+							if((number[3]*100)>Threshold)	number4_record3|=0x10;
+							if((number[4]*100)>Threshold)	number4_record3|=0x08;
+							if((number[5]*100)>Threshold)	number4_record3|=0x04;
+						  if((number[6]*100)>Threshold)	number4_record3|=0x02;
+						  if((number[7]*100)>Threshold)	number4_record3|=0x01;
+							
+							if(number4_record2==number4_record3)number4_record=number4_record2;
+							 
+					}
+				else if(number_wait==12)//µÚÒ»´Î¼ì²â5
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number5_record|=0x80;
+							if((number[1]*100)>Threshold)	number5_record|=0x40;
+							if((number[2]*100)>Threshold)	number5_record|=0x20;
+							if((number[3]*100)>Threshold)	number5_record|=0x10;
+							if((number[4]*100)>Threshold)	number5_record|=0x08;
+							if((number[5]*100)>Threshold)	number5_record|=0x04;
+						  if((number[6]*100)>Threshold)	number5_record|=0x02;
+						  if((number[7]*100)>Threshold)	number5_record|=0x01;
+					}
+				else if(number_wait==13)//µÚ¶ş´Î¼ì²â5
+					{
+							Get_CapCurrent_Value(number); 
+							if((number[0]*100)>Threshold)	number5_record2|=0x80;
+							if((number[1]*100)>Threshold)	number5_record2|=0x40;
+							if((number[2]*100)>Threshold)	number5_record2|=0x20;
+							if((number[3]*100)>Threshold)	number5_record2|=0x10;
+							if((number[4]*100)>Threshold)	number5_record2|=0x08;
+							if((number[5]*100)>Threshold)	number5_record2|=0x04;
+						  if((number[6]*100)>Threshold)	number5_record2|=0x02;
+						  if((number[7]*100)>Threshold)	number5_record2|=0x01;
+							
+							if(number5_record==number5_record2)number_wait=14;
+							 
+					}
+				else if(number_wait==14)//µÚÈı´Î¼ì²â5
+					{
+							Get_CapCurrent_Value(number); //µÃµ½µ±Ç°»®È­µçÈİÊıÖµ
+							if((number[0]*100)>Threshold)	number5_record3|=0x80;
+							if((number[1]*100)>Threshold)	number5_record3|=0x40;
+							if((number[2]*100)>Threshold)	number5_record3|=0x20;
+							if((number[3]*100)>Threshold)	number5_record3|=0x10;
+							if((number[4]*100)>Threshold)	number5_record3|=0x08;
+							if((number[5]*100)>Threshold)	number5_record3|=0x04;
+						  if((number[6]*100)>Threshold)	number5_record3|=0x02;
+						  if((number[7]*100)>Threshold)	number5_record3|=0x01;
+							
+							if(number5_record2==number5_record3)number5_record=number5_record2;
+							 
+					}
+				else if(number_wait==15)
+				 {
+						LCD_ShowString(82,57,152,16,16,"Train Successful!");//19 ×î¶à19×Ö·û
+			      LCD_ShowString(8,74,297,16,16,"off Current mode,open mode 4"); //28 ×î¶à37×Ö·û				 
+				 }
+					if(number_wait<15) number_wait++;
 			}
 		}
 		
@@ -340,31 +639,43 @@ void KEY_Init(void)
 
 
 
-//È¥×î´óÖµ*2£¬×îĞ¡Öµ*2£¬ÖĞ¼äÈ¡Æ½¾ù,»ñµÃ°ËÍ¨µÀµçÈİ³õÊ¼Öµ£¬ÓÃÒÔmainÇåÁã³õÊ¼µçÈİÖµ
+//»ñµÃ°ËÍ¨µÀµçÈİ³õÊ¼Öµ£¬ÓÃÒÔmainÇåÁã³õÊ¼µçÈİÖµ
 void Get_CapInit_Value(void)
 {
-	int i,j;//iÎª8Í¨µÀÑ­»·¼ÆÊıÆ÷£¬jÎª»º³åÊı×éÖ¸Õë±ê
-	float sum=0;
+ 	int i,j,k;//iÎª8Í¨µÀÑ­»·¼ÆÊıÆ÷£¬jÎª»º³åÊı×éÖ¸Õë±ê,kÎªÇóºÍ¼ÆÊıÆ÷
+	float sum,total;//sumÓÃÒÔ¼ÇÂ¼Ã¿¸öÍ¨µÀ×ÜÖµ£¬³ıÒÔ²É¼¯´ÎÊı[InitCap_N]£¬µÃµ½Í¨µÀ³õÊ¼»¯¾ùÖµ£¬total¼ÇÂ¼ËùÓĞÍ¨µÀ³õÊ¼»¯¾ùÖµºÍ
+start:
 	for(i=0;i<8;i++) //±éÀúÍ¨µÀ
 	{	
 		sum=0;//ºÍÖµÇåÁã
 		
 		if(i<4) //ÊÖ1   0-3Í¨µÀ
 			{	
-				for(j=0;j<InitCap_N;j++) {	init_Cap_buffer[j] = Cap_Calculate(i);sum+=init_Cap_buffer[j];delay_ms(1);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ,²¢ÀÛ¼ÓºÍ
+				for(j=0;j<InitCap_N;j++) {	init_Cap_buffer[j] = Cap_Calculate(i);sum+=init_Cap_buffer[j];delay_ms(10);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ,²¢ÀÛ¼ÓºÍ
 			}
 		else 	  //ÊÖ2   4-7Í¨µÀ
 			{	
-				for(j=0;j<InitCap_N;j++) {	init_Cap_buffer[j] = Cap_2Calculate(i%4);sum+=init_Cap_buffer[j];delay_ms(1);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ£¬²¢ÀÛ¼ÓºÍ
+				for(j=0;j<InitCap_N;j++) {	init_Cap_buffer[j] = Cap_2Calculate(i%4);sum+=init_Cap_buffer[j];delay_ms(10);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ£¬²¢ÀÛ¼ÓºÍ
 			}
 					 
 		temp[i] = sum/InitCap_N;//¸³8Í¨µÀ³õÊ¼»¯Æ½¾ùÖµ
 	}
+		total=0;
+  	delay_ms(750); //µÈ´ıÒ»ÃëÔÙ´Î²É¼¯
+	
+  	Get_CapCurrent_Value(test_temp);//È¡Ò»´Îµ±Ç°µçÈİÖµ
+  	for(k=0;k<8;k++) total+=test_temp[k]; //Çó×ÜÍ¨µÀµçÈİÖµºÍ
+		
+	  if(	0<total && total<Init_Test){ LCD_ShowString(30,10,16,16,16,"*");return ;}
+	  else { LCD_ShowString(30,10,16,16,16,"!");goto start;}
+	
 }
 
-//µÃµ½µ±Ç°ÑµÁ·Ê±µçÈİÖµ£¬a[]Îª×°8Í¨µÀµçÈİÖµÊı×éÖ¸ÕëµØÖ·£¬nÎªÊı×éÄÚ´æ´óĞ¡
-void Get_CapCurrent_Value(float cap[],int n)
-{
+//»ñÈ¡×î³õµçÈİÖµ,
+
+//µÃµ½µ±Ç°ÑµÁ·Ê±µçÈİÖµ£¬a[]Îª×°8Í¨µÀµçÈİÖµÊı×éÖ¸ÕëµØÖ·
+void Get_CapCurrent_Value(float cap[])
+{	
 	int i,j;//iÎª8Í¨µÀÑ­»·¼ÆÊıÆ÷£¬jÎª»º³åÊı×éÖ¸Õë±ê
 	float sum=0;
 	for(i=0;i<8;i++) //±éÀúÍ¨µÀ
@@ -373,16 +684,103 @@ void Get_CapCurrent_Value(float cap[],int n)
 		
 		if(i<4) //ÑµÁ·Õß1  0-3Í¨µÀ
 			{	
-				for(j=0;j<CrrentCap_N;j++) {	crrent_Cap_buffer[j] = Cap_Calculate(i);sum+=crrent_Cap_buffer[j];delay_ms(1);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ,²¢ÀÛ¼ÓºÍ
+				for(j=0;j<CrrentCap_N;j++) {	crrent_Cap_buffer[j] = Cap_Calculate(i);sum+=crrent_Cap_buffer[j];delay_us(100);}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ,²¢ÀÛ¼ÓºÍ
 			}
 		else 	  //ÑµÁ·Õß2  4-7Í¨µÀ
 			{	
-				for(j=0;j<CrrentCap_N;j++) {	crrent_Cap_buffer[j] = Cap_2Calculate(i%4);sum+=crrent_Cap_buffer[j];delay_ms(1);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ£¬²¢ÀÛ¼ÓºÍ
+				for(j=0;j<CrrentCap_N;j++) {	crrent_Cap_buffer[j] = Cap_2Calculate(i%4);sum+=crrent_Cap_buffer[j];delay_us(100);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ£¬²¢ÀÛ¼ÓºÍ
 			}
 			
 		cap[i] = sum/CrrentCap_N;//¸³8Í¨µÀµ±Ç°ÑµÁ·Æ½¾ùÖµ
 		cap[i] -= temp[i];       //¸³8Í¨µÀÓë³õÊ¼»¯µÄ²îÖµ
 	}
+}
+
+//µÃµ½µ±Ç°ÊÖÊÆÖµ£¬·µ»Ø0ÎªÎŞÊÖÊÆ£¬·µ»Ø0x80Îª1ÓÒ£¬0x40Îª1×ó£¬0x20Îª2ÓÒ£¬0x10Îª2×ó
+u8 Get_gesture_Value(float cap[])
+{	
+	int i,j;//iÎª8Í¨µÀÑ­»·¼ÆÊıÆ÷£¬jÎª»º³åÊı×éÖ¸Õë±ê
+	float sum=0;
+	static u8 gesture1_zuo=0,gesture1_you=0,gesture2_zuo=0,gesture2_you=0; 
+	
+	for(i=0;i<8;i++) //±éÀúÍ¨µÀ
+	{	
+		sum=0;
+		
+		if(i<4) //ÑµÁ·Õß1  0-3Í¨µÀ
+			{	
+				for(j=0;j<CrrentCap_N;j++) {	crrent_Cap_buffer[j] = Cap_Calculate(i);sum+=crrent_Cap_buffer[j];delay_us(100);}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ,²¢ÀÛ¼ÓºÍ
+			}
+		else 	  //ÑµÁ·Õß2  4-7Í¨µÀ
+			{	
+				for(j=0;j<CrrentCap_N;j++) {	crrent_Cap_buffer[j] = Cap_2Calculate(i%4);sum+=crrent_Cap_buffer[j];delay_us(100);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ£¬²¢ÀÛ¼ÓºÍ
+			}
+			
+		cap[i] = sum/CrrentCap_N;//¸³8Í¨µÀµ±Ç°ÑµÁ·Æ½¾ùÖµ
+		cap[i] -= temp[i];       //¸³8Í¨µÀÓë³õÊ¼»¯µÄ²îÖµ
+		
+		if((cap[i]*100)>MusicThr) //Èç¹ûµ±Ç°Í¨µÀµ¼Í¨
+			{
+					if(i==0)//ÊÇ²»ÊÇ0Í¨µÀ£¬ÊÇµÄ»°£¬ÊÖÊÆ¼ÇÂ¼ÖÃ1
+					{
+						gesture1_you=1;
+						if(gesture1_zuo==1)return 0x40;
+						else gesture1_zuo=0;
+					}
+					if(i==3)//ÊÇ²»ÊÇ3Í¨µÀ£¬Èç¹ûÊÇ£¬Ö®Ç°0Í¨µÀÊÇ²»ÊÇÒÑ¾­µ¼Í¨¹ı£¬Èç¹ûÊÇ£¬ÄÇÃ´·µ»ØÓÒÊÖÊÆ£¬·ñÔòÇå¿ÕÊÖÊÆ¼ÇÂ¼
+					{
+					  gesture1_zuo=1;
+						if(gesture1_you==1)return 0x80;
+						else gesture1_you=0;
+					}
+					if(i==4)//ÊÇ²»ÊÇ4Í¨µÀ£¬ÊÇµÄ»°£¬ÊÖÊÆ¼ÇÂ¼ÖÃ1
+					{
+						gesture2_you=1;
+						if(gesture2_zuo==1)return 0x10;
+						else gesture2_zuo=0;
+					}
+					if(i==7)//ÊÇ²»ÊÇ3Í¨µÀ£¬Èç¹ûÊÇ£¬Ö®Ç°0Í¨µÀÊÇ²»ÊÇÒÑ¾­µ¼Í¨¹ı£¬Èç¹ûÊÇ£¬ÄÇÃ´·µ»ØÓÒÊÖÊÆ£¬·ñÔòÇå¿ÕÊÖÊÆ¼ÇÂ¼
+					{
+					  gesture2_zuo=1;
+						if(gesture2_you==1)return 0x20;
+						else gesture2_you=0;
+					}
+			}
+	}
+	return 0;
+}
+
+//ËæÊ±¼ÆËã»·¾³³õÖµº¯Êı£¨¼ÆËãÁ¿Ğ¡£©
+void MinGet_CapInit_Value(void)
+{
+ 	int i,j,k;//iÎª8Í¨µÀÑ­»·¼ÆÊıÆ÷£¬jÎª»º³åÊı×éÖ¸Õë±ê,kÎªÇóºÍ¼ÆÊıÆ÷
+	float sum,total;//sumÓÃÒÔ¼ÇÂ¼Ã¿¸öÍ¨µÀ×ÜÖµ£¬³ıÒÔ²É¼¯´ÎÊı[MinInitCap_N]£¬µÃµ½Í¨µÀ³õÊ¼»¯¾ùÖµ£¬total¼ÇÂ¼ËùÓĞÍ¨µÀ³õÊ¼»¯¾ùÖµºÍ
+start:
+  LCD_ShowString(30,10,16,16,16,"!");
+	for(i=0;i<8;i++) //±éÀúÍ¨µÀ
+	{	
+		sum=0;//ºÍÖµÇåÁã
+		
+		if(i<4) //ÊÖ1   0-3Í¨µÀ
+			{	
+				for(j=0;j<MinInitCap_N;j++) {	init_Cap_buffer[j] = Cap_Calculate(i);sum+=init_Cap_buffer[j];delay_ms(10);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ,²¢ÀÛ¼ÓºÍ
+			}
+		else 	  //ÊÖ2   4-7Í¨µÀ
+			{	
+				for(j=0;j<MinInitCap_N;j++) {	init_Cap_buffer[j] = Cap_2Calculate(i%4);sum+=init_Cap_buffer[j];delay_ms(10);	}//Ã¿¸öÍ¨µÀ²É¼¯InitCap_N¸öÊı¾İ£¬²¢ÀÛ¼ÓºÍ
+			}
+					 
+		temp[i] = sum/MinInitCap_N;//¸³8Í¨µÀ³õÊ¼»¯Æ½¾ùÖµ
+	}
+		total=0;
+  	delay_ms(25); //µÈ´ı10msÔÙ´Î²É¼¯
+	
+  	Get_CapCurrent_Value(test_temp);//È¡Ò»´Îµ±Ç°µçÈİÖµ
+  	for(k=0;k<8;k++) total+=test_temp[k]; //Çó×ÜÍ¨µÀµçÈİÖµºÍ
+		
+	  if(	0<total && total<MinInit_Test){ LCD_ShowString(30,10,16,16,16,"*");return ;}
+	  else { LCD_ShowString(30,10,16,16,16,"!");goto start;}
+	
 }
 
 ////ÊÖ1ÂË²¨

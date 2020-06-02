@@ -1,6 +1,6 @@
 #include "fdc22142.h"
 #include "delay.h"
-#include "led.h"
+#include "lcd.h"
 
 u32 Data_FDC2;
 
@@ -234,9 +234,10 @@ u8 FDC2214_2Init(void)
 	res=FDC2_Read(MANUFACTURER_ID);//读取制造商ID号（实际寄存器地址为0X7E，实际应读取值为5549），测试设备读取是否正常
 	
 	ID_FDC2214 = FDC2_Read(DEVICE_ID);//读取设备ID号，并幅值给ID号变量
-	u1_printf("DEVICE_ID:0X%x\r\n",ID_FDC2214);//打印ID号
+	u1_printf("DEVICE_ID2:0X%x\r\n",ID_FDC2214);//打印ID号
 	if(res==0x5449)//如果设备正确
 	{
+	  LCD_ShowString(215,10,16,16,16,"ok");
 		//设置Set2_FDC2214寄存器
 		Set2_FDC2214(RCOUNT_CH0,0x34,0xFB);//参考计数转换间隔时间（T=(CH0_RCOUNT*16)/Frefx）  其中Frefx为内部40Mhz时钟经过CHx_FREF_DIVIDER寄存器配置的分频后，产生的通道参考频率（见手册13页）
 		Set2_FDC2214(RCOUNT_CH1,0x34,0xFB);//Frefx≈21.7mhz    源程序值34 FB    手册推荐值20 89

@@ -2957,7 +2957,40 @@ void LCD_ShowString(u16 x,u16 y,u16 width,u16 height,u8 size,u8 *p)
 }
 
 
+void screen_init_background(void)
+{
+	LCD_Clear(WHITE);
+	POINT_COLOR=BLUE;
+//画横线画表
+	LCD_DrawLine(5, 5, 235, 5);//顶线
+	LCD_DrawLine(5, 30, 235, 30);//第一条线
+	LCD_DrawLine(5, 55, 235, 55);//第二条线
+	LCD_DrawLine(5, 95, 235, 95);//第三条线 
+	LCD_DrawLine(5, 120, 235, 120);//第四条线
+	
+	LCD_DrawLine(5, 120+65, 235, 120+65);//第五条线
+	LCD_DrawLine(5, 120+65+65, 235, 120+65+65);//底二线
+	LCD_DrawLine(5, 315, 235, 315);//底线
 
+//画竖线
+	LCD_DrawLine(235, 5, 235, 315);//右边线
+	LCD_DrawLine(5, 5, 5, 315);//左边线
+	LCD_DrawLine(120, 95, 120, 315);//左中线
+//	LCD_DrawLine(120, 77, 125, 272);//左2竖线
+	
+//写标题	
+//x,y:起点坐标
+//width,height:区域大小  
+//size:字体大小
+//*p:字符串起始地址		
+	LCD_ShowString(12,10,176,16,16,"    2018 chongqing TI ");
+  POINT_COLOR=BLACK;
+	LCD_ShowString(25,33,96,16,16,"Now Mode is:");
+	LCD_ShowString(25,58,56,16,16,"Notice:");
+	LCD_ShowString(28,97,56,16,16,"Result");
+	LCD_ShowString(148,97,56,16,16,"Result");
+
+}
 
 
 

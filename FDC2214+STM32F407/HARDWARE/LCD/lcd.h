@@ -177,7 +177,8 @@ void LCD_WriteRAM(u16 RGB_Code);
 void LCD_SSD_BackLightSet(u8 pwm);							//SSD1963 背光控制
 void LCD_Scan_Dir(u8 dir);									//设置屏扫描方向
 void LCD_Display_Dir(u8 dir);								//设置屏幕显示方向
-void LCD_Set_Window(u16 sx,u16 sy,u16 width,u16 height);	//设置窗口					   						   																			 
+void LCD_Set_Window(u16 sx,u16 sy,u16 width,u16 height);	//设置窗口			
+void screen_init_background(void);		   						   																			 
 //LCD分辨率设置
 #define SSD_HOR_RESOLUTION		800		//LCD水平分辨率
 #define SSD_VER_RESOLUTION		480		//LCD垂直分辨率
