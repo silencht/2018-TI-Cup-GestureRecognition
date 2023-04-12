@@ -3,6 +3,9 @@
 #include "sys.h"
 #include "silencht_usart.h"	
 
+//IO·½ÏòÉèÖÃ
+//#define FDC_SDA_IN()  {GPIOC->CRL&=0XFF0FFFFF;GPIOC->CRL|=8<<4*5;}  //STM32F103
+//#define FDC_SDA_OUT() {GPIOC->CRL&=0XFF0FFFFF;GPIOC->CRL|=3<<4*5;}
 #define FDC_SDA_IN()  {GPIOC->MODER&=~(3<<(5*2));GPIOC->MODER|=0<<(5*2);delay_us(1);}//STM32F407
 #define FDC_SDA_OUT() {GPIOC->MODER&=~(3<<(5*2));GPIOC->MODER|=1<<(5*2);delay_us(1);}
 

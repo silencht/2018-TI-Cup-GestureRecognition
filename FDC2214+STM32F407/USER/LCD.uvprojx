@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F40_41xxx,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\HARDWARE\LED;..\FWLIB\inc;..\HARDWARE\FDC2214;..\HARDWARE\USART;..\HARDWARE\DataScope_DP;..\HARDWARE\FDC22142;..\HARDWARE\matrix;..\HARDWARE\LCD;..\HARDWARE\EXTI;..\HARDWARE\LED_BEEP</IncludePath>
+              <IncludePath>..\CORE;..\SYSTEM\delay;..\SYSTEM\sys;..\USER;..\HARDWARE\LED;..\FWLIB\inc;..\HARDWARE\FDC2214;..\HARDWARE\USART;..\HARDWARE\DataScope_DP</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -401,6 +401,16 @@
           <GroupName>HARDWARE</GroupName>
           <Files>
             <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\LED\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>silencht_usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\USART\silencht_usart.c</FilePath>
+            </File>
+            <File>
               <FileName>fdc2214.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\FDC2214\fdc2214.c</FilePath>
@@ -409,31 +419,6 @@
               <FileName>DataScope_DP.C</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\DataScope_DP\DataScope_DP.C</FilePath>
-            </File>
-            <File>
-              <FileName>fdc22142.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\FDC22142\fdc22142.c</FilePath>
-            </File>
-            <File>
-              <FileName>lcd.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\LCD\lcd.c</FilePath>
-            </File>
-            <File>
-              <FileName>exti.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\EXTI\exti.c</FilePath>
-            </File>
-            <File>
-              <FileName>silencht_usart.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\USART\silencht_usart.c</FilePath>
-            </File>
-            <File>
-              <FileName>BEEP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HARDWARE\LED_BEEP\BEEP.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -1,6 +1,6 @@
 #include "fdc2214.h"
 #include "delay.h"
-#include "lcd.h"
+#include "led.h"
 
 u32 Data_FDC;
 
@@ -237,7 +237,6 @@ u8 FDC2214_Init(void)
 	u1_printf("DEVICE_ID:0X%x\r\n",ID_FDC2214);//打印ID号
 	if(res==0x5449)//如果设备正确
 	{
-	  LCD_ShowString(12,10,16,16,16,"ok");
 		//设置Set_FDC2214寄存器
 		Set_FDC2214(RCOUNT_CH0,0x34,0xFB);//参考计数转换间隔时间（T=(CH0_RCOUNT*16)/Frefx）  其中Frefx为内部40Mhz时钟经过CHx_FREF_DIVIDER寄存器配置的分频后，产生的通道参考频率（见手册13页）
 		Set_FDC2214(RCOUNT_CH1,0x34,0xFB);//Frefx≈21.7mhz    源程序值34 FB    手册推荐值20 89
@@ -255,13 +254,13 @@ u8 FDC2214_Init(void)
 		Set_FDC2214(CLOCK_DIVIDERS_C_CH3,0x20,0x02);
 		
 		Set_FDC2214(DRIVE_CURRENT_CH0,0x78,0x00);//0.146ma（传感器时钟建立+转换时间的驱动电流）datasheet page20 and 36
-		Set_FDC2214(DRIVE_CURRENT_CH1,0x78,0x00);//控制传感器驱动电流，使传感器振荡峰值位于1.2V~1.8V之间 原始设置0x78
+		Set_FDC2214(DRIVE_CURRENT_CH1,0x78,0x00);//控制传感器驱动电流，使传感器振荡峰值位于1.2V~1.8V之间
 		Set_FDC2214(DRIVE_CURRENT_CH2,0x78,0x00);
 		Set_FDC2214(DRIVE_CURRENT_CH3,0x78,0x00);
 		
 		Set_FDC2214(ERROR_CONFIG,0x00,0x00);//全部禁止错误汇报 page33
 		
-		Set_FDC2214(MUX_CONFIG,0xC2,0x09);//通道0，1，2 ，3；选择10Mhz为超过振荡槽振荡频率的最低设置，多通道，四通道 page34-35  ，选择
+		Set_FDC2214(MUX_CONFIG,0xC2,0x0C);//通道0，1，2 ，3；选择10Mhz为超过振荡槽振荡频率的最低设置，多通道，四通道 page34-35  ，选择
 		
 		Set_FDC2214(CONFIG,0x14,0x01);//激活模式，全电流模式，使用内部振荡器做参考频率，INTB引脚会随状态寄存器更新被置位
 	}

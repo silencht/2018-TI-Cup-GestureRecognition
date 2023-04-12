@@ -1,7 +1,7 @@
  
 #include "DataScope_DP.h"
  
-unsigned char DataScope_OutPut_Buffer[42];	   //串口发送缓冲区  //默认42
+ unsigned char DataScope_OutPut_Buffer[42];	   //串口发送缓冲区
 
 
 //函数说明：将单精度浮点数据转成4字节数据并存入指定地址 
