@@ -1,0 +1,6 @@
+[0630/172720:ERROR:tcp_socket_win.cc(335)] bind() returned an error: 通常每个套接字地址(协议/网络地址/端口)只允许使用一次。 (0x2740)
+[0630/172720:ERROR:devtools_http_handler.cc(229)] Cannot start http server for devtools. Stop devtools.
+[0630/181255:ERROR:cache_util_win.cc(20)] Unable to move the cache: 5
+[0630/181255:ERROR:cache_util.cc(134)] Unable to move cache folder C:\ProgramData\Altium\Altium Designer {D855472F-BFB0-4C81-A732-BCDC10A2033E}\BrowserCache\GPUCache to C:\ProgramData\Altium\Altium Designer {D855472F-BFB0-4C81-A732-BCDC10A2033E}\BrowserCache\old_GPUCache_000
+[0630/181255:ERROR:cache_creator.cc(129)] Unable to create cache
+[0630/181255:ERROR:shader_disk_cache.cc(589)] Shader Cache Creation failed: -2
